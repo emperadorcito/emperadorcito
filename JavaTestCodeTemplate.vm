@@ -1,0 +1,89 @@
+#if (${PackageName} && ${PackageName} != "")
+package ${PackageName};
+
+#end
+
+import ${EspressoPackageNamePrefix}.test.espresso.DataInteraction;
+import ${EspressoPackageNamePrefix}.test.espresso.ViewInteraction;
+import ${EspressoPackageNamePrefix}.test.filters.LargeTest;
+import ${EspressoPackageNamePrefix}.test.rule.ActivityTestRule;
+#if (${HasRequestedPermissions})
+import ${EspressoPackageNamePrefix}.test.rule.GrantPermissionRule;
+#end
+import ${EspressoPackageNamePrefix}.test.runner.AndroidJUnit4;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
+
+import static ${EspressoPackageNamePrefix}.test.InstrumentationRegistry.getInstrumentation;
+import static ${EspressoPackageNamePrefix}.test.espresso.Espresso.onData;
+import static ${EspressoPackageNamePrefix}.test.espresso.Espresso.onView;
+import static ${EspressoPackageNamePrefix}.test.espresso.Espresso.pressBack;
+import static ${EspressoPackageNamePrefix}.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
+#if (${AddContribImport})
+import static ${EspressoPackageNamePrefix}.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition;
+#end
+import static ${EspressoPackageNamePrefix}.test.espresso.action.ViewActions.*;
+import static ${EspressoPackageNamePrefix}.test.espresso.assertion.ViewAssertions.*;
+import static ${EspressoPackageNamePrefix}.test.espresso.matcher.ViewMatchers.*;
+
+import ${ResourcePackageName}.R;
+
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
+import org.hamcrest.core.IsInstanceOf;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.anything;
+import static org.hamcrest.Matchers.is;
+
+@LargeTest
+@RunWith(AndroidJUnit4.class)
+#if (${WasEverPaused})
+// WARNING: Espresso Test Recorder was paused during recording.
+// The generated test may be missing actions which might lead to unexpected behavior.
+#end
+public class ${ClassName} {
+
+    @Rule
+    public ActivityTestRule<${TestActivityName}> mActivityTestRule = new ActivityTestRule<>(${TestActivityName}.class);
+
+#if (${HasRequestedPermissions})
+    @Rule
+    public GrantPermissionRule mGrantPermissionRule =
+            GrantPermissionRule.grant(
+                    ${RequestedPermissions});
+
+#end
+    @Test
+    public void ${TestMethodName}() {
+    #foreach (${line} in ${TestCode})
+    ${line}
+    #end
+    }
+    #if (${AddChildAtPositionMethod})
+
+    private static Matcher<View> childAtPosition(
+            final Matcher<View> parentMatcher, final int position) {
+
+        return new TypeSafeMatcher<View>() {
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("Child at position " + position + " in parent ");
+                parentMatcher.describeTo(description);
+            }
+
+            @Override
+            public boolean matchesSafely(View view) {
+                ViewParent parent = view.getParent();
+                return parent instanceof ViewGroup && parentMatcher.matches(parent)
+                        && view.equals(((ViewGroup)parent).getChildAt(position));
+            }
+        };
+    }
+    #end
+}
